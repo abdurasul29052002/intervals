@@ -6,8 +6,8 @@ import lombok.Setter;
 @Setter
 @Getter
 public class Interval {
-    private double start;
-    private double end;
+    private final double start;
+    private final double end;
 
     public Interval(double start, double end) {
         if (start > end) {
