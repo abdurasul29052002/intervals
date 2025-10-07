@@ -6,7 +6,7 @@
 
     <groupId>uz.sonic</groupId>
     <artifactId>intervals</artifactId>
-    <version>0.0.1</version>
+    <version>0.0.2</version>
 
     <name>intervals</name>
     <description>Interval mathematics library for Java</description>
