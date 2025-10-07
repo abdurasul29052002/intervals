@@ -48,7 +48,7 @@ public class FuzzySet {
 
     public FuzzySet divide(FuzzySet other) {
         return new FuzzySet(
-                this.value - other.value,
+                this.value / other.value,
                 this.interval.divide(other.interval)
         );
     }
