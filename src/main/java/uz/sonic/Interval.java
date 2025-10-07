@@ -45,7 +45,7 @@ public record Interval(BigDecimal start, BigDecimal end) {
     }
 
     public Interval divide(Interval other) {
-        // 0 ni o‘z ichiga olgan interval bilan bo‘lish mumkin emas
+        // Division by an interval containing zero is not allowed
         if (other.start.compareTo(BigDecimal.ZERO) <= 0 && other.end.compareTo(BigDecimal.ZERO) >= 0) {
             throw new ArithmeticException("Division by an interval that spans zero is undefined.");
         }
