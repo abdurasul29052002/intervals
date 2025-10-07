@@ -1,4 +1,6 @@
-package uz.sonic;
+package uz.sonic.sets;
+
+import uz.sonic.interval.Interval;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
