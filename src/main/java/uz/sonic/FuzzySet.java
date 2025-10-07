@@ -1,45 +1,50 @@
 package uz.sonic;
 
-public record FuzzySet(double value, double left, double right, Interval interval) {
+import java.math.BigDecimal;
+import java.math.MathContext;
 
-    public FuzzySet(double value, double left, double right) {
-        this(value, left, right, new Interval(value - left, value + right));
+public record FuzzySet(BigDecimal value, BigDecimal left, BigDecimal right, Interval interval) {
+
+    private static final MathContext MC = MathContext.DECIMAL64;
+
+    public FuzzySet(BigDecimal value, BigDecimal left, BigDecimal right) {
+        this(value, left, right, new Interval(value.subtract(left), value.add(right)));
     }
 
-    public FuzzySet(double value, Interval interval) {
-        this(value, value - interval.start(), interval.end() - value, interval);
+    public FuzzySet(BigDecimal value, Interval interval) {
+        this(value, value.subtract(interval.start()), interval.end().subtract(value), interval);
     }
 
     public FuzzySet add(FuzzySet other) {
         return new FuzzySet(
-                this.value + other.value,
+                this.value.add(other.value, MC),
                 this.interval.add(other.interval)
         );
     }
 
     public FuzzySet subtract(FuzzySet other) {
         return new FuzzySet(
-                this.value - other.value,
+                this.value.subtract(other.value, MC),
                 this.interval.subtract(other.interval)
         );
     }
 
     public FuzzySet multiply(FuzzySet other) {
         return new FuzzySet(
-                this.value * other.value,
+                this.value.multiply(other.value, MC),
                 this.interval.multiply(other.interval)
         );
     }
 
     public FuzzySet divide(FuzzySet other) {
         return new FuzzySet(
-                this.value / other.value,
+                this.value.divide(other.value, MC),
                 this.interval.divide(other.interval)
         );
     }
 
-    public boolean contains(double value) {
-        return this.interval.contains(value);
+    public boolean contains(BigDecimal val) {
+        return this.interval.contains(val);
     }
 
     public boolean intersects(Interval other) {

@@ -1,8 +1,14 @@
 package uz.sonic;
 
-public record Interval(double start, double end) {
+import java.math.BigDecimal;
+import java.math.MathContext;
+
+public record Interval(BigDecimal start, BigDecimal end) {
+
+    private static final MathContext MC = MathContext.DECIMAL64;
+
     public Interval {
-        if (start > end) {
+        if (start.compareTo(end) > 0) {
             throw new IllegalArgumentException("Start must be less than or equal to end.");
         }
     }
@@ -13,41 +19,49 @@ public record Interval(double start, double end) {
     }
 
     public Interval add(Interval other) {
-        return new Interval(this.start + other.start, this.end + other.end);
+        return new Interval(
+                this.start.add(other.start, MC),
+                this.end.add(other.end, MC)
+        );
     }
 
     public Interval subtract(Interval other) {
-        return new Interval(this.start - other.end, this.end - other.start);
+        return new Interval(
+                this.start.subtract(other.end, MC),
+                this.end.subtract(other.start, MC)
+        );
     }
 
     public Interval multiply(Interval other) {
-        double a = this.start * other.start;
-        double b = this.start * other.end;
-        double c = this.end * other.start;
-        double d = this.end * other.end;
+        BigDecimal a = this.start.multiply(other.start, MC);
+        BigDecimal b = this.start.multiply(other.end, MC);
+        BigDecimal c = this.end.multiply(other.start, MC);
+        BigDecimal d = this.end.multiply(other.end, MC);
 
-        double newStart = Math.min(Math.min(a, b), Math.min(c, d));
-        double newEnd = Math.max(Math.max(a, b), Math.max(c, d));
+        BigDecimal newStart = a.min(b).min(c).min(d);
+        BigDecimal newEnd = a.max(b).max(c).max(d);
 
         return new Interval(newStart, newEnd);
     }
 
     public Interval divide(Interval other) {
-        if (other.start <= 0 && other.end >= 0) {
+        // 0 ni o‘z ichiga olgan interval bilan bo‘lish mumkin emas
+        if (other.start.compareTo(BigDecimal.ZERO) <= 0 && other.end.compareTo(BigDecimal.ZERO) >= 0) {
             throw new ArithmeticException("Division by an interval that spans zero is undefined.");
         }
 
-        double r1 = 1.0 / other.start;
-        double r2 = 1.0 / other.end;
-        var reciprocal = new Interval(Math.min(r1, r2), Math.max(r1, r2));
+        BigDecimal r1 = BigDecimal.ONE.divide(other.start, MC);
+        BigDecimal r2 = BigDecimal.ONE.divide(other.end, MC);
+        Interval reciprocal = new Interval(r1.min(r2), r1.max(r2));
+
         return this.multiply(reciprocal);
     }
 
-    public boolean contains(double value) {
-        return value >= start && value <= end;
+    public boolean contains(BigDecimal value) {
+        return value.compareTo(start) >= 0 && value.compareTo(end) <= 0;
     }
 
     public boolean intersects(Interval other) {
-        return this.end >= other.start && other.end >= this.start;
+        return this.end.compareTo(other.start) >= 0 && other.end.compareTo(this.start) >= 0;
     }
 }
