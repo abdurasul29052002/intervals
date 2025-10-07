@@ -1,20 +1,10 @@
 package uz.sonic;
 
-import lombok.Getter;
-import lombok.Setter;
-
-@Setter
-@Getter
-public class Interval {
-    private final double start;
-    private final double end;
-
-    public Interval(double start, double end) {
+public record Interval(double start, double end) {
+    public Interval {
         if (start > end) {
             throw new IllegalArgumentException("Start must be less than or equal to end.");
         }
-        this.start = start;
-        this.end = end;
     }
 
     @Override
@@ -22,11 +12,11 @@ public class Interval {
         return "[" + start + ", " + end + "]";
     }
 
-    public Interval add(Interval other){
+    public Interval add(Interval other) {
         return new Interval(this.start + other.start, this.end + other.end);
     }
 
-    public Interval subtract(Interval other){
+    public Interval subtract(Interval other) {
         return new Interval(this.start - other.end, this.end - other.start);
     }
 

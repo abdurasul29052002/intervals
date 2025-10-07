@@ -1,38 +1,23 @@
 package uz.sonic;
 
-import lombok.Getter;
-import lombok.Setter;
+public record FuzzySet(double value, double left, double right, Interval interval) {
 
-@Setter
-@Getter
-public class FuzzySet {
-    private final double value;
-    private final double left;
-    private final double right;
-    private final Interval interval;
-
-    public FuzzySet(double value, double left, double right){
-        this.value = value;
-        this.left = left;
-        this.right = right;
-        this.interval = new Interval(value - left, value + right);
+    public FuzzySet(double value, double left, double right) {
+        this(value, left, right, new Interval(value - left, value + right));
     }
 
-    public FuzzySet(double value, Interval interval){
-        this.value = value;
-        this.left = value - interval.getStart();
-        this.right = interval.getEnd() - value;
-        this.interval = interval;
+    public FuzzySet(double value, Interval interval) {
+        this(value, value - interval.start(), interval.end() - value, interval);
     }
 
-    public FuzzySet add(FuzzySet other){
+    public FuzzySet add(FuzzySet other) {
         return new FuzzySet(
                 this.value + other.value,
                 this.interval.add(other.interval)
         );
     }
 
-    public FuzzySet subtract(FuzzySet other){
+    public FuzzySet subtract(FuzzySet other) {
         return new FuzzySet(
                 this.value - other.value,
                 this.interval.subtract(other.interval)
@@ -66,3 +51,4 @@ public class FuzzySet {
         return "{" + value + ", " + left + ", " + right + "}";
     }
 }
+
