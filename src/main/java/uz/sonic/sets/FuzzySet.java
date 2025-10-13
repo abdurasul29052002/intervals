@@ -139,5 +139,37 @@ public record FuzzySet(BigDecimal value, BigDecimal left, BigDecimal right, Inte
     public String toString() {
         return "{" + value + ", " + left + ", " + right + "}";
     }
+
+    /**
+     * Computes the sine of this {@code FuzzySet}, using a given number of terms for the
+     * approximation of the sine function. The sine operation is applied to the central value
+     * and the interval of the fuzzy set, producing a new {@code FuzzySet}.
+     *
+     * @param terms the number of terms to use in the approximation for computing the sine.
+     *              A higher number of terms increases the precision of the computation.
+     * @return a new {@code FuzzySet} representing the sine of this fuzzy set.
+     */
+    public FuzzySet sin(int terms) {
+        return new FuzzySet(
+                BigDecimal.valueOf(Math.sin(this.value.doubleValue())),
+                this.interval.sin(terms)
+        );
+    }
+
+    /**
+     * Computes the cosine of this {@code FuzzySet} using a specified number of terms for the
+     * approximation. The cosine operation is applied to the central value and the interval of
+     * the fuzzy set, producing a new {@code FuzzySet}.
+     *
+     * @param terms the number of terms to use in the approximation for computing the cosine.
+     *              A higher number of terms increases the precision of the computation.
+     * @return a new {@code FuzzySet} representing the cosine of this fuzzy set.
+     */
+    public FuzzySet cos(int terms) {
+        return new FuzzySet(
+                BigDecimal.valueOf(Math.cos(this.value.doubleValue())),
+                this.interval.cos(terms)
+        );
+    }
 }
 
