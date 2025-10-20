@@ -171,5 +171,12 @@ public record FuzzySet(BigDecimal value, BigDecimal left, BigDecimal right, Inte
                 this.interval.cos(terms)
         );
     }
+
+    public FuzzySet exp(int terms){
+        return new FuzzySet(
+                BigDecimal.valueOf(Math.exp(this.value.doubleValue())),
+                this.interval.exp(terms)
+        );
+    }
 }
 

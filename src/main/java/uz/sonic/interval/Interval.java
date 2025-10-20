@@ -3,6 +3,8 @@ package uz.sonic.interval;
 import java.math.BigDecimal;
 import java.math.MathContext;
 
+import static uz.sonic.interval.Utils.factorial;
+
 /**
  * Represents a closed interval {@code [start, end]} on the real number line, where both boundaries
  * are included. This class supports basic arithmetic operations such as addition, subtraction,
@@ -134,22 +136,6 @@ public record Interval(BigDecimal start, BigDecimal end) {
     }
 
     /**
-     * Computes the factorial of a non-negative integer using an iterative approach.
-     * The factorial of a number n is defined as the product of all positive integers less than or equal to n.
-     *
-     * @param n the non-negative integer for which the factorial is to be computed
-     * @return the factorial of the given integer as a {@code BigDecimal}
-     * @throws IllegalArgumentException if {@code n} is negative
-     */
-    private static BigDecimal factorial(int n) {
-        var result = BigDecimal.ONE;
-        for (int i = 2; i <= n; i++) {
-            result = result.multiply(BigDecimal.valueOf(i));
-        }
-        return result;
-    }
-
-    /**
      * Computes the sine of the interval using an approximation based on the Taylor series.
      * The sine is computed up to the specified number of terms, providing an interval
      * that bounds the result of the sine operation for the given interval range.
@@ -159,23 +145,18 @@ public record Interval(BigDecimal start, BigDecimal end) {
      * @return a new {@code Interval} representing the sine of the interval.
      */
     public Interval sin(int terms) {
-        var result = new Interval(BigDecimal.ZERO, BigDecimal.ZERO);
-        var power = this;
-        boolean negative = false;
-
-        for (int k = 0; k < terms; k++) {
-            int exp = 2 * k + 1;
-            var fact = factorial(exp);
-            var term = power.divide(fact);
-
-            result = negative ? result.subtract(term) : result.add(term);
+        var sum = this;
+        var a_i = this;
+        boolean negative = true;
+        for (int i = 1; i < terms; i++) {
+            var ratio = this.multiply(this).divide(
+                    BigDecimal.valueOf((2L * (i - 1) + 2) * (2L * (i - 1) + 3))
+            );
+            a_i = a_i.multiply(ratio);
+            sum = negative ? sum.subtract(a_i) : sum.add(a_i);
             negative = !negative;
-
-            if (k < terms - 1) {
-                power = power.multiply(this.multiply(this));
-            }
         }
-        return result;
+        return sum;
     }
 
     /**
@@ -188,23 +169,19 @@ public record Interval(BigDecimal start, BigDecimal end) {
      * @return a new {@code Interval} representing the cosine of the interval.
      */
     public Interval cos(int terms) {
-        var result = new Interval(BigDecimal.ZERO, BigDecimal.ZERO);
-        var power = new Interval(BigDecimal.ONE, BigDecimal.ONE);
-        boolean negative = false;
+        var sum = new Interval(BigDecimal.ONE, BigDecimal.ONE);
+        var a_i = new Interval(BigDecimal.ONE, BigDecimal.ONE);
+        boolean negative = true;
 
-        for (int k = 0; k < terms; k++) {
-            int exp = 2 * k;
-            var fact = factorial(exp);
-            var term = power.divide(fact);
-
-            result = negative ? result.subtract(term) : result.add(term);
+        for (int i = 1; i < terms; i++) {
+            var ratio = this.multiply(this).divide(
+                    BigDecimal.valueOf((2L * (i - 1) + 1) * (2L * (i - 1) + 2))
+            );
+            a_i = a_i.multiply(ratio);
+            sum = negative ? sum.subtract(a_i) : sum.add(a_i);
             negative = !negative;
-
-            if (k < terms - 1) {
-                power = power.multiply(this.multiply(this));
-            }
         }
-        return result;
+        return sum;
     }
 
     /**
@@ -229,4 +206,15 @@ public record Interval(BigDecimal start, BigDecimal end) {
         }
     }
 
+    public Interval exp(int terms) {
+        var sum = new Interval(BigDecimal.ZERO, BigDecimal.ZERO);
+        var a_i = new Interval(BigDecimal.valueOf(1), BigDecimal.valueOf(1));
+        sum = sum.add(a_i);
+        for (int i = 1; i < terms; i++) {
+            var ratio = this.divide(BigDecimal.valueOf(i));
+            a_i = a_i.multiply(ratio);
+            sum = sum.add(a_i);
+        }
+        return sum;
+    }
 }
