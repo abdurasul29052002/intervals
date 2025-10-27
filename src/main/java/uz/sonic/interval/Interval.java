@@ -3,8 +3,6 @@ package uz.sonic.interval;
 import java.math.BigDecimal;
 import java.math.MathContext;
 
-import static uz.sonic.interval.Utils.factorial;
-
 /**
  * Represents a closed interval {@code [start, end]} on the real number line, where both boundaries
  * are included. This class supports basic arithmetic operations such as addition, subtraction,
@@ -144,7 +142,7 @@ public record Interval(BigDecimal start, BigDecimal end) {
      *              results in a more accurate approximation but increases computation time.
      * @return a new {@code Interval} representing the sine of the interval.
      */
-    public Interval sin(int terms) {
+    public Interval sinTaylor(int terms) {
         var sum = this;
         var a_i = this;
         boolean negative = true;
@@ -168,7 +166,7 @@ public record Interval(BigDecimal start, BigDecimal end) {
      *              results in a more accurate approximation but increases computation time.
      * @return a new {@code Interval} representing the cosine of the interval.
      */
-    public Interval cos(int terms) {
+    public Interval cosTaylor(int terms) {
         var sum = new Interval(BigDecimal.ONE, BigDecimal.ONE);
         var a_i = new Interval(BigDecimal.ONE, BigDecimal.ONE);
         boolean negative = true;
@@ -206,7 +204,7 @@ public record Interval(BigDecimal start, BigDecimal end) {
         }
     }
 
-    public Interval exp(int terms) {
+    public Interval expTaylor(int terms) {
         var sum = new Interval(BigDecimal.ZERO, BigDecimal.ZERO);
         var a_i = new Interval(BigDecimal.valueOf(1), BigDecimal.valueOf(1));
         sum = sum.add(a_i);
@@ -216,5 +214,26 @@ public record Interval(BigDecimal start, BigDecimal end) {
             sum = sum.add(a_i);
         }
         return sum;
+    }
+
+    public Interval sin() {
+        return new Interval(
+                BigDecimal.valueOf(Math.sin(start.doubleValue())),
+                BigDecimal.valueOf(Math.sin(end.doubleValue()))
+        );
+    }
+
+    public Interval cos() {
+        return new Interval(
+                BigDecimal.valueOf(Math.cos(start.doubleValue())),
+                BigDecimal.valueOf(Math.cos(end.doubleValue()))
+        );
+    }
+
+    public Interval exp() {
+        return new Interval(
+                BigDecimal.valueOf(Math.exp(start.doubleValue())),
+                BigDecimal.valueOf(Math.exp(end.doubleValue()))
+        );
     }
 }

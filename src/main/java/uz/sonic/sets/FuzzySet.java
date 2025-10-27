@@ -17,9 +17,9 @@ import java.math.MathContext;
  *
  * <p>Instances of this class are immutable once constructed.</p>
  *
- * @param value   the central value of the fuzzy set
- * @param left    the left deviation from the central value
- * @param right   the right deviation from the central value
+ * @param value    the central value of the fuzzy set
+ * @param left     the left deviation from the central value
+ * @param right    the right deviation from the central value
  * @param interval the interval corresponding to the range of the fuzzy set
  */
 public record FuzzySet(BigDecimal value, BigDecimal left, BigDecimal right, Interval interval) {
@@ -31,7 +31,7 @@ public record FuzzySet(BigDecimal value, BigDecimal left, BigDecimal right, Inte
      * The interval of the fuzzy set is automatically calculated based on the provided parameters.
      *
      * @param value the central value of the fuzzy set
-     * @param left the left deviation from the central value, used to calculate the lower bound of the interval
+     * @param left  the left deviation from the central value, used to calculate the lower bound of the interval
      * @param right the right deviation from the central value, used to calculate the upper bound of the interval
      */
     public FuzzySet(BigDecimal value, BigDecimal left, BigDecimal right) {
@@ -149,10 +149,10 @@ public record FuzzySet(BigDecimal value, BigDecimal left, BigDecimal right, Inte
      *              A higher number of terms increases the precision of the computation.
      * @return a new {@code FuzzySet} representing the sine of this fuzzy set.
      */
-    public FuzzySet sin(int terms) {
+    public FuzzySet sinTaylor(int terms) {
         return new FuzzySet(
                 BigDecimal.valueOf(Math.sin(this.value.doubleValue())),
-                this.interval.sin(terms)
+                this.interval.sinTaylor(terms)
         );
     }
 
@@ -165,17 +165,38 @@ public record FuzzySet(BigDecimal value, BigDecimal left, BigDecimal right, Inte
      *              A higher number of terms increases the precision of the computation.
      * @return a new {@code FuzzySet} representing the cosine of this fuzzy set.
      */
-    public FuzzySet cos(int terms) {
+    public FuzzySet cosTaylor(int terms) {
         return new FuzzySet(
                 BigDecimal.valueOf(Math.cos(this.value.doubleValue())),
-                this.interval.cos(terms)
+                this.interval.cosTaylor(terms)
         );
     }
 
-    public FuzzySet exp(int terms){
+    public FuzzySet expTaylor(int terms) {
         return new FuzzySet(
                 BigDecimal.valueOf(Math.exp(this.value.doubleValue())),
-                this.interval.exp(terms)
+                this.interval.expTaylor(terms)
+        );
+    }
+
+    public FuzzySet sin() {
+        return new FuzzySet(
+                BigDecimal.valueOf(Math.sin(this.value.doubleValue())),
+                this.interval.sin()
+        );
+    }
+
+    public FuzzySet cos() {
+        return new FuzzySet(
+                BigDecimal.valueOf(Math.cos(this.value.doubleValue())),
+                this.interval.cos()
+        );
+    }
+
+    public FuzzySet exp() {
+        return new FuzzySet(
+                BigDecimal.valueOf(Math.exp(this.value.doubleValue())),
+                this.interval.exp()
         );
     }
 }
