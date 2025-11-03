@@ -2,6 +2,8 @@ package uz.sonic.interval;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
+import java.math.RoundingMode;
+import java.util.function.Function;
 
 /**
  * Represents a closed interval {@code [start, end]} on the real number line, where both boundaries
@@ -28,7 +30,9 @@ public record Interval(BigDecimal start, BigDecimal end) {
      */
     public Interval {
         if (start.compareTo(end) > 0) {
-            throw new IllegalArgumentException("Start must be less than or equal to end.");
+            var temp = start;
+            start = end;
+            end = temp;
         }
     }
 
@@ -143,18 +147,25 @@ public record Interval(BigDecimal start, BigDecimal end) {
      * @return a new {@code Interval} representing the sine of the interval.
      */
     public Interval sinTaylor(int terms) {
-        var sum = this;
-        var a_i = this;
-        boolean negative = true;
-        for (int i = 1; i < terms; i++) {
-            var ratio = this.multiply(this).divide(
-                    BigDecimal.valueOf((2L * (i - 1) + 2) * (2L * (i - 1) + 3))
-            );
-            a_i = a_i.multiply(ratio);
-            sum = negative ? sum.subtract(a_i) : sum.add(a_i);
-            negative = !negative;
-        }
-        return sum;
+        Function<BigDecimal, BigDecimal> sinTaylorScalar = (x) -> {
+            var sum = x;     // sin(x) ≈ x - x^3/3! + ...
+            var a_i = x;     // a_0 = x
+            var negative = true;
+
+            for (long n = 1; n < terms; n++) {
+                // k = -x^2 / ((2n+2)*(2n+3))
+                var ratio = x.multiply(x)
+                        .divide(BigDecimal.valueOf((2 * n) * (2 * n + 1)), 2, RoundingMode.HALF_UP);
+                a_i = a_i.multiply(ratio);
+                sum = negative ? sum.subtract(a_i) : sum.add(a_i);
+                negative = !negative;
+            }
+            return sum;
+        };
+        return new Interval(
+                sinTaylorScalar.apply(this.start),
+                sinTaylorScalar.apply(this.end)
+        );
     }
 
     /**
@@ -167,19 +178,27 @@ public record Interval(BigDecimal start, BigDecimal end) {
      * @return a new {@code Interval} representing the cosine of the interval.
      */
     public Interval cosTaylor(int terms) {
-        var sum = new Interval(BigDecimal.ONE, BigDecimal.ONE);
-        var a_i = new Interval(BigDecimal.ONE, BigDecimal.ONE);
-        boolean negative = true;
+        Function<BigDecimal, BigDecimal> cosTaylorScalar = (x) -> {
+            var sum = BigDecimal.ONE;
+            var a_i = BigDecimal.ONE;
+            boolean negative = true;
 
-        for (int i = 1; i < terms; i++) {
-            var ratio = this.multiply(this).divide(
-                    BigDecimal.valueOf((2L * (i - 1) + 1) * (2L * (i - 1) + 2))
-            );
-            a_i = a_i.multiply(ratio);
-            sum = negative ? sum.subtract(a_i) : sum.add(a_i);
-            negative = !negative;
-        }
-        return sum;
+            for (long i = 0; i < terms; i++) {
+                var ratio = x.multiply(x).divide(
+                        BigDecimal.valueOf((2 * i + 1) * (2 * i + 2)),
+                        2,
+                        RoundingMode.HALF_UP
+                );
+                a_i = a_i.multiply(ratio);
+                sum = negative ? sum.subtract(a_i) : sum.add(a_i);
+                negative = !negative;
+            }
+            return sum;
+        };
+        return new Interval(
+                cosTaylorScalar.apply(this.start),
+                cosTaylorScalar.apply(this.end)
+        );
     }
 
     /**
